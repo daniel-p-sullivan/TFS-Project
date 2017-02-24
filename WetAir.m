@@ -11,7 +11,6 @@ classdef WetAir
         S
         U
         PSAT
-        %do nothing
     end
     
     methods
