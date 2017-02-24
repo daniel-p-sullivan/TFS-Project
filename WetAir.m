@@ -12,7 +12,6 @@ classdef WetAir
         U
         PSAT
         %do nothing again
-        %HI
     end
     
     methods
