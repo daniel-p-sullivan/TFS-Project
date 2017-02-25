@@ -4,6 +4,8 @@ classdef WetAir
     properties
         RH     %relative humidity
         MIX
+        CP
+        CV
         X
         T
         P
@@ -30,8 +32,12 @@ classdef WetAir
             c.Y = y;
             wetair = Mixture([Gas.Nitrogen, Gas.Oxygen, Gas.Argon, Gas.Carbon_Dioxide, Gas.Water], y, 307.6);
             c.MIX = wetair
-        end
-        
+            c.CP = mass_cpmix(wetair, tmix);
+            c.CV = c.CP - wetair.R;
+            c.H = mass_hmix(wetair, tmix);
+            c.S = mass_smix(c, 101.325);
+            c.U = mass_umix(wetair, tmix);
+        end        
     end
     
 end
