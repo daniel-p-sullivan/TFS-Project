@@ -31,7 +31,7 @@ classdef WetAir
             y = [yda ywv];
             c.Y = y;
             wetair = Mixture([Gas.Nitrogen, Gas.Oxygen, Gas.Argon, Gas.Carbon_Dioxide, Gas.Water], y, 307.6);
-            c.MIX = wetair
+            c.MIX = wetair;
             c.CP = mass_cpmix(wetair, tmix);
             c.CV = c.CP - wetair.R;
             c.H = mass_hmix(wetair, tmix);
@@ -39,7 +39,7 @@ classdef WetAir
             c.U = mass_umix(wetair, tmix);
         end
     end
-    enumeration
-       Phase1 (0.6, 298.1, 99.4017, 2.128); 
-    end
+    %enumeration
+      % Phase1 (0.6, 298.1, 99.4017, 2.128); 
+   % end
 end
