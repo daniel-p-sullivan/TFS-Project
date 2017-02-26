@@ -4,20 +4,24 @@ classdef Turbine
     
     properties
         InletNode
-        OutletNode
+        OutletNode = Node(0);
         Efficiency
         ho_s
         ho_a
         To_s
         To_a
+        Work
+        P_out
     end
     
     methods
-        function c = Turbine(InletNode, eff, outletpressure, work)
-            c.Efficiency = Eff;
+        function c = Turbine(InletNode, eff, outletpressure, outletstation)
+            c.Efficiency = eff;
             c.InletNode = InletNode;
-            c.OutletNode = OutletNode;
-            
+            c.P_out = outletpressure;
+            c.OutletNode.Station = outletstation;
+            c.OutletNode.P = outletpressure;
+        end
     end
     
 end
