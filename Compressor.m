@@ -4,25 +4,31 @@ classdef Compressor
     
     properties
         InletNode
-        OutletNode
+        OutletNode = Node(0);
         Efficiency
         ho_s
         ho_a
         To_s
         To_a
-        Compression_Ratio 
+        Compression_Ratio
+        Work
     end
     
     methods
-        function c = Compressor(InletNode, OutletNode, Eff, Comp_ratio)
+        function c = Compressor(InletNode, Eff, Comp_ratio, outletstation)
             c.Efficiency = Eff;
             c.InletNode = InletNode;
-            c.OutletNode = OutletNode;
             c.Compression_Ratio = Comp_ratio;
-        end
-         function solve (OutletNode)
+            c.OutletNode.Station = outletstation;
+            c.OutletNode.P = InletNode.P*Comp_ratio;
             
+        end
+            
+            
+
     end
+       
+                
     
 end
 

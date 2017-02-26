@@ -6,9 +6,9 @@ b = 500;
 c = 1480;
 count=0;
 x=10;
-fluid2 = WorkingFluid(b,workingfluid.P,workingfluid.Y);
+fluid2 = WorkingFluid(workingfluid.Y, workingfluid.Node);
 while(abs(x)>.01 && x~=0)
-    x = h_target-mass_hmix(fluid2.MIX,fluid2.T);
+    x = h_target-mass_hmix(fluid2.MIX,b);
     if(x>0)
         a=b;
         temp = b;
@@ -18,8 +18,8 @@ while(abs(x)>.01 && x~=0)
         temp = b;
         b = (a+temp)/2;
     end
-    fluid2.T = b;
-    count = 1+count
+    
+    count = 1+count;
 end
 end
 

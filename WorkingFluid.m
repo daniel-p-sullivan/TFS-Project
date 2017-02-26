@@ -19,19 +19,19 @@ classdef WorkingFluid
     end
     
     methods
-        function c = WorkingFluid(tmix, pmix, y, Node)
+        function c = WorkingFluid(y, Node)
             
-            c.T = tmix;
-            c.P = pmix;
+            c.T = Node.T;
+            c.P = Node.P;
             c.Node = Node;
             c.Y = y;
-            WorkingFluid = Mixture([Gas.Nitrogen, Gas.Oxygen, Gas.Argon, Gas.Carbon_Dioxide, Gas.Water], y, 307.6);
-            c.MIX = WorkingFluid;
-            c.CP = mass_cpmix(WorkingFluid, tmix);
-            c.CV = c.CP - WorkingFluid.R;
-            c.H = mass_hmix(WorkingFluid, tmix);
+            working_fluid = Mixture([Gas.Nitrogen, Gas.Oxygen, Gas.Argon, Gas.Carbon_Dioxide, Gas.Water], y, 307.6);
+            c.MIX = working_fluid;
+            c.CP = mass_cpmix(working_fluid, Node.T);
+            c.CV = c.CP - working_fluid.R;
+            c.H = mass_hmix(working_fluid, Node.T);
             c.S = mass_smix(c, 101.325);
-            c.U = mass_umix(WorkingFluid, tmix);
+            c.U = mass_umix(working_fluid, Node.T);
         end
     end
     

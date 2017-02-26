@@ -13,10 +13,11 @@ classdef Turbine
     end
     
     methods
-        function c = Turbine(Eff,InletNode,OutletNode)
+        function c = Turbine(InletNode, eff, outletpressure, work)
             c.Efficiency = Eff;
             c.InletNode = InletNode;
             c.OutletNode = OutletNode;
+            
     end
     
 end

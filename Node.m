@@ -7,11 +7,12 @@ classdef Node
         P
         h
         Station
+        
     end
     
     methods
-        function c = Node(Station)
-            Station.c = Station;
+        function c = Node(station)
+            c.Station = station;
         end
     end
             

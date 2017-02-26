@@ -5,18 +5,24 @@ classdef GuideVane
     properties
         InletP
         OutletP
+        InletT
+        OutletT
         P_drop
         InletNode
-        OutletNode
+        OutletNode = Node(0);
     end
     
     methods
-        function c = GuideVane (Inlet, pdrop, outlet)
+        function c = GuideVane (Inlet, pdrop, outletstation)
             c.P_drop = pdrop;
-            c.InletP = InletNode.P;
-            c.OutletP = InletP - pdrop;
-            c.OutletNode = outlet;
+            c.InletP = Inlet.P;
+            c.OutletP = Inlet.P - pdrop;
             c.InletNode = Inlet;
+            c.InletT = Inlet.T;
+            c.OutletT = Inlet.T;
+            c.OutletNode.T = Inlet.T;
+            c.OutletNode.P = Inlet.P - pdrop;
+            c.OutletNode.Station = outletstation;
         end
     end
     
