@@ -18,9 +18,10 @@ classdef WetAir
     end
     
     methods
-        function c = WetAir(rh, tmix, pmix, psat)
+        function c = WetAir(rh, tmix, pmix)
             c.RH = rh;
             c.T = tmix;
+            psat = .61121*exp((18.678-((tmix-273.15)/234.5))*((tmix-273.15)/(257.14+tmix-273.15)));
             c.PSAT = psat;
             c.P = pmix;
             pwv = rh * psat;
