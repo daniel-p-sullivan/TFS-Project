@@ -23,10 +23,8 @@ classdef Compressor
             c.OutletNode.P = InletNode.P*Comp_ratio;
             
         end
-            
-            
-
     end
+    
        
                 
     
