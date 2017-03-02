@@ -83,9 +83,9 @@ Fluid48 = WorkingFluid(InletAir.Y, Node48);
 Node48.h = Fluid48.H;
 
 LPT = Turbine(Node48, 100, P5, 5); 
-LPT.Work = (30607/Generator_eff) / MassFlow_total;
+LPT.Work = (30600/Generator_eff) / MassFlow_total;
 LPT.ho_a = Node48.h - LPT.Work;
-LPT.To_a = T_h_solver(Fluid48, HPT.ho_a);
+LPT.To_a = T_h_solver(Fluid48, LPT.ho_a);
 LPT.To_s = T_s_Solver(Fluid48,P5);
 LPT.ho_s = mass_hmix(Fluid48.MIX,LPT.To_s);
 LPT.Efficiency = (LPT.ho_a - LPT.InletNode.h)/(LPT.ho_s - LPT.InletNode.h);
