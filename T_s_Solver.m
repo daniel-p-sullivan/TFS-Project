@@ -11,7 +11,7 @@ Tguess = Inletfluid.T*(fluid2.P/Inletfluid.P)^(1-(1/(Inletfluid.CP/Inletfluid.CV
 fluid2.T = Tguess;
 a=300;
 b=Tguess;
-c=1480;
+c=1100;
 count=0;
 x = mass_smix(Inletfluid,Pref)-mass_smix(fluid2,Pref);
 while(abs(x)>.001)
