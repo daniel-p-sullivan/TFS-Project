@@ -1,4 +1,4 @@
-classdef GuideVane
+classdef GuideVane < handle
     %UNTITLED4 Summary of this class goes here
     %   Detailed explanation goes here
     
@@ -23,6 +23,7 @@ classdef GuideVane
             c.OutletNode.T = Inlet.T;
             c.OutletNode.P = Inlet.P - pdrop;
             c.OutletNode.Station = outletstation;
+            
         end
     end
     
