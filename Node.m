@@ -1,12 +1,13 @@
 classdef Node
-    %UNTITLED Summary of this class goes here
-    %   Detailed explanation goes here
+    %Thermodynamic station where two or more devices meet. This class is
+    %used as an easy way to store temperature and pressure at all the
+    %stations in the cycle.
     
     properties
         T
         P
         h
-        Station
+        Station %Station Number
         
     end
     
