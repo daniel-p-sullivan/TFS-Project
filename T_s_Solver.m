@@ -10,13 +10,13 @@ fluid2.P = OutletPressure;
 Tguess = Inletfluid.T*(fluid2.P/Inletfluid.P)^(1-(1/(Inletfluid.CP/Inletfluid.CV)));
 fluid2.T = Tguess;
 a=300;
-b=Tguess;
-c=1100;
+b=fluid2.T;
+c=1400;
 count=0;
-x = mass_smix(Inletfluid,Pref)-mass_smix(fluid2,Pref);
+x = mass_smix(Inletfluid,Pref) - mass_smix(fluid2,Pref);
 while(abs(x)>.001)
     
-    if(x>0)
+    if(x > 0)
         a = b;
         temp = b;
         b=(c-temp)/2 + temp;

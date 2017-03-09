@@ -15,7 +15,7 @@ classdef Turbine < handle
     end
     
     methods
-        function c = Turbine(InletNode,InletFluid, eff, outletpressure, work, outletstation)
+        function c = Turbine(InletNode, InletFluid, eff, outletpressure, work, outletstation)
             c.Efficiency = eff;
             c.InletNode = InletNode;
             c.OutletNode.Station = outletstation;
@@ -23,16 +23,16 @@ classdef Turbine < handle
             if (outletpressure==0)
                 c.ho_a = InletFluid.H - work;
                 c.To_a = T_h_solver(InletFluid, c.ho_a);
-                c.ho_s = work/eff + InletFluid.H;
+                c.ho_s = InletFluid.H - work/eff;
                 c.To_s = T_h_solver(InletFluid, c.ho_s);
-                c.P_out = exp((mass_s0mix(InletFluid.MIX,c.To_s)-mass_s0mix(InletFluid.MIX,InletFluid.T)/InletFluid.MIX.R))*InletFluid.P; 
+                c.P_out = exp((mass_s0mix(InletFluid.MIX,c.To_s)-mass_s0mix(InletFluid.MIX,InletFluid.T))/InletFluid.MIX.R)*InletFluid.P; 
             end
             
             if (work==0)
                 c.P_out = outletpressure;
                 c.To_s = T_s_Solver(InletFluid, outletpressure);
                 c.ho_s = mass_hmix(InletFluid.MIX, c.To_s);
-                c.ho_a = eff * (InletFluid.H - c.ho_s) + InletFluid.H;
+                c.ho_a = InletFluid.H - eff * (InletFluid.H - c.ho_s);
                 c.To_a = T_h_solver(InletFluid, c.ho_a);
                 c.Work = InletFluid.H - c.ho_a;
             end

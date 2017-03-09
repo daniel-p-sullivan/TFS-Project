@@ -37,6 +37,10 @@ VIGV_dP = 0.249088908333 * VIGV_dP_e; %converting in H20 to kPa
 Ex_dP = 0.249088908333 * Ex_dP_e; %converting in H20 to kPa
 P5 = P1 + Ex_dP; %Calculating LPT outlet pressure
 
+Net_Work(22) = zeros;
+cycle_Eff(22) = zeros;
+for i=1:22
+T1 = (5*i+459.67) * (5/9);
 %Inlet Ideal Gas Mixture
 InletAir = WetAir(RH1,T1,P1); %Create a WetAir object with the input temp, relative Humidity, and pressure.
 MassFlow_total = (1+InletAir.X(2)/InletAir.X(1)) * mflow_DA; %calculate total mass flow rate given dry air flow rate, kg/s
@@ -70,12 +74,12 @@ Node4 = Combustor1.OutletNode;
 Fluid4 = WorkingFluid(InletAir.Y, Node4);
 
 %Solving for station 48
-HPT = Turbine(Node4, Fluid4, 0, P48, LPC.Work + HPC.Work, 48);
+HPT = Turbine(Node4, Fluid4, HPT_eff, HPT_OutletPressure, LPC.Work + HPC.Work, 48);
 Node48 = HPT.OutletNode;
 Fluid48 = WorkingFluid(InletAir.Y, Node48);
 
 %Solving for station 5
-LPT = Turbine(Node48, Fluid48, 0, P5, (30600/Generator_eff) / MassFlow_total,  5); 
+LPT = Turbine(Node48, Fluid48, LPT_eff, P5, 0, 5); 
 Node5 = LPT.OutletNode;
 Fluid5 = WorkingFluid(InletAir.Y, Node5);
 
@@ -85,5 +89,7 @@ Node6 = Exhaust.OutletNode;
 Fluid6 = WorkingFluid(InletAir.Y, Node6);
 
 %Cycle efficiency
-cycle_Eff = LPT.Work/(Node4.h - Node3.h);
-Net_Work = MassFlow_total * LPT.Work;
+cycle_Eff(i) = LPT.Work/(Node4.h - Node3.h);
+Net_Work(i) = MassFlow_total * LPT.Work*Generator_eff;
+
+end

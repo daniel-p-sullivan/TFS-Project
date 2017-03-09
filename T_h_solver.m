@@ -7,13 +7,14 @@ c = 1480;
 count=0;
 
 fluid2 = WorkingFluid(workingfluid.Y, workingfluid.Node);
-x = h_target-mass_hmix(fluid2.MIX,b);
+x = h_target - mass_hmix(fluid2.MIX,b);
 while(abs(x)>.001 && x~=0)
     
     if(x>0)
         a=b;
         temp = b;
         b=(c+temp)/2;
+        
     elseif (x<0)
         c = b;
         temp = b;
