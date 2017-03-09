@@ -14,7 +14,7 @@ classdef WetAir
     
     properties
         RH     %relative humidity
-        mix    %Mixture
+        MIX    %Mixture
         CP
         CV
         X      %Mass fractions
@@ -42,12 +42,12 @@ classdef WetAir
             yda = (1 - ywv) * [0.78084, 0.20947, 0.00934 0.00035]; %This is our assumed composition of dry air being adjusted for the presence of water vapor
             y = [yda ywv];
             c.Y = y;
-            wetair = Mixture([Gas.Nitrogen, Gas.Oxygen, Gas.Argon, Gas.Carbon_Dioxide, Gas.Water], y, 307.6);
+            wetair = Mixture([Gas.Nitrogen, Gas.Oxygen, Gas.Argon, Gas.Carbon_Dioxide, Gas.Water], y, 307.6); %Creating a mixture of Gases
             c.MIX = wetair;
             c.CP = mass_cpmix(wetair, tmix);
             c.CV = c.CP - wetair.R;
             c.H = mass_hmix(wetair, tmix);
-            c.S = mass_smix(c, 101.325);
+            c.S = mass_smix(c, 101.325); %Entropy calculated with reference pressure of 101.325 kPa
             c.U = mass_umix(wetair, tmix);
         end
     end

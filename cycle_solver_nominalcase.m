@@ -15,8 +15,8 @@ LPC_eff = .82;
 r_LPC = 6;
 r_HPC = 4;
 HPC_eff  = .84;
-LPT_eff = .100;
-HPT_eff = .100;
+LPT_eff = 0;
+HPT_eff = 0;
 Generator_eff = .977;
 %Input parameters converted to SI
 T1 = (T1_e+459.67) * (5/9); %K
