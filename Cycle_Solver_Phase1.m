@@ -43,8 +43,13 @@ FuelMassFlowRate(22) = zeros; %lbm/hr
 HeatRate (22) = zeros; %BTU/kW-hr
 SpecificFuelConsumption(22) = zeros; %lbm/kW-hr
 
+T_range = zeros(1, 22);
+
 for i=1:22   %iterating through all temperatures in the excel data sheet
 T1 = (5*i+459.67) * (5/9);
+
+T_range(i) = T1;
+
 %Inlet Ideal Gas Mixture
 InletAir = WetAir(RH1,T1,P1); %Create a WetAir object with the input temp, relative Humidity, and pressure.
 MassFlow_total = (1+InletAir.X(2)/InletAir.X(1)) * mflow_DA; %calculate total mass flow rate given dry air flow rate, kg/s
@@ -95,8 +100,47 @@ Fluid6 = WorkingFluid(InletAir.Y, Node6);
 %Output Parameters
 cycle_Eff(i) = LPT.Work/(Node4.h - Node3.h); %calculate cycle efficiency
 Net_Work(i) = MassFlow_total * LPT.Work*Generator_eff; %calculate net work
-FuelMassFlowRate(i) = zeros; %lbm/hr
-HeatRate (i) = ; %BTU/kW-hr
-SpecificFuelConsumption(i) = ; %lbm/kW-hr
+FuelMassFlowRate(i) = MassFlow_total*(Combustor1.ho_a - HPC.ho_a) / LHV; %lbm/hr
+HeatRate (i) = FuelMassFlowRate(i)*LHV / Net_Work(i); %BTU/kW-hr
+SpecificFuelConsumption(i) = FuelMassFlowRate(i) / Net_Work(i); %lbm/kW-hr
 
 end
+
+%% Unit Conversion
+T_range_F = 5:5:110
+Net_Work_Output = Net_Work*1e-3; %MW
+FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600 %lbm/hr
+HeatRate_Output = FuelMassFlowRate_Output .* LHV_e ./ (Net_Work_Output); %BTU/kW-hr 
+SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ Net_Work_Output; %lbm/kW-hr
+
+%% Plots
+
+subplot(3, 2, 1)
+plot(T_range_F, cycle_Eff, '*')                         %plots eff versus T
+title('Cycle Efficiency versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Cycle Efficiency')
+
+subplot(3, 2, 2)
+plot(T_range_F, Net_Work_Output, '*')                   %plots net work versus T
+title('Net Work versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Net Work (MW)')
+
+subplot(3, 2, 3)
+plot(T_range_F, FuelMassFlowRate_Output, '*')           %plots mdotf versus T    
+title('Fuel Mass Flow Rate versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')
+
+subplot(3, 2, 4)
+plot(T_range_F, HeatRate_Output, '*')                   %plots hr versus T
+title('Heat Rate versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
+
+subplot(3, 2, 5)
+plot(T_range_F, SpecificFuelConsumption_Output, '*')    %plots sfc versus T
+title('Specific Fuel Consumption versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
