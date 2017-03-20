@@ -37,9 +37,13 @@ VIGV_dP = 0.249088908333 * VIGV_dP_e; %converting in H20 to kPa
 Ex_dP = 0.249088908333 * Ex_dP_e; %converting in H20 to kPa
 P5 = P1 + Ex_dP; %Calculating LPT outlet pressure
 
-Net_Work(22) = zeros;
+Net_Work(22) = zeros; %kW
 cycle_Eff(22) = zeros;
-for i=1:22
+FuelMassFlowRate(22) = zeros; %lbm/hr
+HeatRate (22) = zeros; %BTU/kW-hr
+SpecificFuelConsumption(22) = zeros; %lbm/kW-hr
+
+for i=1:22   %iterating through all temperatures in the excel data sheet
 T1 = (5*i+459.67) * (5/9);
 %Inlet Ideal Gas Mixture
 InletAir = WetAir(RH1,T1,P1); %Create a WetAir object with the input temp, relative Humidity, and pressure.
@@ -88,8 +92,11 @@ Exhaust = GuideVane(Node5, Ex_dP, 6);
 Node6 = Exhaust.OutletNode;
 Fluid6 = WorkingFluid(InletAir.Y, Node6);
 
-%Cycle efficiency
-cycle_Eff(i) = LPT.Work/(Node4.h - Node3.h);
-Net_Work(i) = MassFlow_total * LPT.Work*Generator_eff;
+%Output Parameters
+cycle_Eff(i) = LPT.Work/(Node4.h - Node3.h); %calculate cycle efficiency
+Net_Work(i) = MassFlow_total * LPT.Work*Generator_eff; %calculate net work
+FuelMassFlowRate(i) = zeros; %lbm/hr
+HeatRate (i) = ; %BTU/kW-hr
+SpecificFuelConsumption(i) = ; %lbm/kW-hr
 
 end
