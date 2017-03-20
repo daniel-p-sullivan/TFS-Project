@@ -22,9 +22,9 @@ classdef Compressor < handle
             c.InletNode = InletNode;
             c.Compression_Ratio = Comp_ratio;
             c.OutletNode.Station = outletstation;
-            c.OutletNode.P = InletNode.P*Comp_ratio;
-            c.To_s = T_s_Solver(InletFluid, InletFluid.P*Comp_ratio);
-            c.ho_s = mass_hmix(InletFluid.MIX,c.To_s);
+            c.OutletNode.P = InletNode.P*Comp_ratio; %Solving for outlet pressure
+            c.To_s = T_s_Solver(InletFluid, InletFluid.P*Comp_ratio); %solving for isentropic outlet temperature
+            c.ho_s = mass_hmix(InletFluid.MIX,c.To_s); %solving for isentropic outlet enthalpy
             c.ho_a = (c.ho_s - InletFluid.H)/Eff + InletFluid.H;
             c.To_a = T_h_solver(InletFluid, c.ho_a);
             c.OutletNode.T = c.To_a;

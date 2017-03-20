@@ -1,6 +1,7 @@
 classdef Combustor < handle
-    %UNTITLED5 Summary of this class goes here
-    %   Detailed explanation goes here
+    %This class calculates the thermodynamic properties at the outlet of
+    %a combustor given the inlet fluid temperature and pressure and the outlet
+    %temperature. 
     
     properties
         InletNode

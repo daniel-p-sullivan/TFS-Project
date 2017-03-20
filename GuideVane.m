@@ -1,14 +1,14 @@
 classdef GuideVane < handle
-    %UNTITLED4 Summary of this class goes here
-    %   Detailed explanation goes here
-    
+    %This class is for a thermodynamic device that only has a pressure drop
+    %between inlet and outlet. The Inlet Node, pressure drop, and
+    %outletstation number are required as inputs to the constructor.
     properties
-        InletP
-        OutletP
-        InletT
-        OutletT
-        P_drop
-        InletNode
+        InletP %inlet pressure
+        OutletP  %outlet pressure
+        InletT  %inlet temperature
+        OutletT   %outlet temperature
+        P_drop  %pressure drop
+        InletNode    
         OutletNode = Node(0);
     end
     
@@ -16,7 +16,7 @@ classdef GuideVane < handle
         function c = GuideVane (Inlet, pdrop, outletstation)
             c.P_drop = pdrop;
             c.InletP = Inlet.P;
-            c.OutletP = Inlet.P - pdrop;
+            c.OutletP = Inlet.P - pdrop; %calculating outlet pressure
             c.InletNode = Inlet;
             c.InletT = Inlet.T;
             c.OutletT = Inlet.T;

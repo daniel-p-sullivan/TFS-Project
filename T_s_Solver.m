@@ -1,7 +1,7 @@
 function [ b ] = T_s_Solver(Inletfluid, OutletPressure)
 %Uses bisection method to solve for the temperature given that a process is
-%isentropic. Inputs required are the inlet fluid, the pressure after the
-%process and the cycle inlet air.
+%isentropic. Inputs required are the inlet fluid and the pressure after the
+%process.
 Pref = 101.325;
 
 
