@@ -5,9 +5,9 @@ GE_Power = GE_data(1, :) / 1000;                %kW to MW, Net Power
 GE_T48 = GE_data(18, :);                        %GE HPT Exit Temperature
 GE_fuelflow_hr = GE_data(7, :);                 %GE fuel mass flow rate [lb/hr]
 GE_fuelflow_s = GE_fuelflow_hr / 3600;          %GE fuel mass flow rate [lb/s]
-GE_exhaustflow = GE_data(22, :)                 %GE exhaust mass flow rate
+GE_exhaustflow = GE_data(22, :);                 %GE exhaust mass flow rate
 GE_massflow = GE_exhaustflow - GE_fuelflow_s;   %GE inlet mass flow rate
-GE_SFC = GE_fuelflow ./ GE_Power                %GE specific fuel consumption
+GE_SFC = GE_fuelflow_hr ./ GE_Power;               %GE specific fuel consumption
 
 %% Input operating parameters English Units
 %The following parameters must be set to 0 if they are unknown before
@@ -171,7 +171,7 @@ ylabel('Net Work (MW)')
 legend('Simulation', 'GE Data',  'Location', 'east');
 
 figure(3);
-plot(T_range_F, FuelMassFlowRate_Output, '*', T_range_F, GE_fuelflow, 'r*')           %plots mdotf versus T    
+plot(T_range_F, FuelMassFlowRate_Output, '*', T_range_F, GE_fuelflow_hr, 'r*')           %plots mdotf versus T    
 title('Fuel Mass Flow Rate versus Inlet Air Temperature')
 xlabel('Inlet Air Temperature (\circF)')
 ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')

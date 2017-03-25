@@ -20,9 +20,9 @@ classdef GuideVane < handle
             c.InletNode = Inlet;
             c.InletT = Inlet.T;
             c.OutletT = Inlet.T;
-            c.OutletNode.T = Inlet.T;
-            c.OutletNode.P = Inlet.P - pdrop;
-            c.OutletNode.Station = outletstation;
+            c.OutletNode.T = Inlet.T;  %setting outlet node temperature
+            c.OutletNode.P = Inlet.P - pdrop; %setting outlet node pressure
+            c.OutletNode.Station = outletstation; %associating outlet with station number
             
         end
     end

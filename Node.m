@@ -13,7 +13,7 @@ classdef Node
     
     methods
         function c = Node(station)
-            c.Station = station;
+            c.Station = station; %setting thermodynamic station number
         end
     end
             
