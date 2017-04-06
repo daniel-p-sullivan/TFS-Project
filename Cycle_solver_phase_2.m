@@ -17,7 +17,7 @@ GE_fuel_names = ['Methane', 'Ethane', 'Propane', ...,
                  'Carbon Dioxide', 'Nitrogen', 'Oxygen'];
 GE_fuel_LMQT = [1 4 0 0; 2 6 0 0; 3 8 0 0; 4 10 0 0; 5 12 0 0; ...
                 6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;]
-GE_equiv_fuel = GE_fuel_molfrac * GE_fuel_LMQT;
+GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT;
 GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0]       %kJ/mol
 GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV';             %kJ/mol
 
@@ -123,9 +123,9 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     P(4, i) = HPC.OutletNode.P;
 
     %Solving for station 4
-    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_fuel_LHV*1000, GE_fuel_lmqt);
+    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV*1000, GE_equiv_fuel_LMQT);
     Node4 = Combustor1.OutletNode;
-    Fluid4 = Combustor1.OutletFluid;
+    Fluid4 = WorkingFluid(Combustor1.y_products,Node4);
     T(5, i) = Combustor1.To_a;
     P(5, i) = Combustor1.OutletNode.P;
 
