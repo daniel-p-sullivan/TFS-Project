@@ -5,9 +5,9 @@ GE_Power = GE_data(1, :) / 1000;                %kW to MW, Net Power
 GE_T48 = GE_data(18, :);                        %GE HPT Exit Temperature
 GE_fuelflow_hr = GE_data(7, :);                 %GE fuel mass flow rate [lb/hr]
 GE_fuelflow_s = GE_fuelflow_hr / 3600;          %GE fuel mass flow rate [lb/s]
-GE_exhaustflow = GE_data(22, :);                 %GE exhaust mass flow rate
+GE_exhaustflow = GE_data(22, :);                %GE exhaust mass flow rate
 GE_massflow = GE_exhaustflow - GE_fuelflow_s;   %GE inlet mass flow rate
-GE_SFC = GE_fuelflow_hr ./ GE_Power;               %GE specific fuel consumption
+GE_SFC = GE_fuelflow_hr ./ (GE_Power*1E3);      %GE specific fuel consumption
 
 %% Input operating parameters English Units
 %The following parameters must be set to 0 if they are unknown before
@@ -149,10 +149,10 @@ end
 %% Unit Conversion
 
 T_range_F = 5:5:110
-Net_Work_Output = Net_Work*1e-3; %MW
+Net_Work_Output = Net_Work*1E-3; %MW
 FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600 %lbm/hr
-HeatRate_Output = FuelMassFlowRate_Output .* LHV_e ./ (Net_Work_Output); %BTU/kW-hr 
-SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ Net_Work_Output; %lbm/kW-hr
+HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
+SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
 
 %% Plots
 
