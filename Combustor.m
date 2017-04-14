@@ -10,6 +10,8 @@ classdef Combustor < handle
         ho_a %Actual outlet enthalpy
         OutletFluid
         y_products
+        AF_molar %moles of air/moles of fuel
+        Z %moles of O2/moles of fuel
     end
    
     methods
@@ -23,13 +25,13 @@ classdef Combustor < handle
             c.ho_a = mass_hmix(InletFluid.MIX,Tout);  %actual outlet enthalpy
             c.OutletNode.h = c.ho_a;  %setting outlet node enthalpy
             
-            L = lmqt(1)
-            M = lmqt(2)
-            Q = lmqt(3)
-            T = lmqt(4)
+            L = lmqt(1);
+            M = lmqt(2);
+            Q = lmqt(3);
+            T = lmqt(4);
             Tin = Inlet.T;
             Tref = 298.15;
-            yo2 = InletFluid.Y(2)
+            yo2 = InletFluid.Y(2);
             AN2 = InletFluid.Y(1) / yo2;
             ACO2 = InletFluid.Y(4) / yo2;
             AAr = InletFluid.Y(3) / yo2;
@@ -37,10 +39,11 @@ classdef Combustor < handle
             
             
             
-            z = (lhv - L*delta_h_molar('Carbon_Dio', Tout, Tref) - M * delta_h_molar('Water', Tout, Tref) / 2 + T * delta_h_molar('Nitrogen', Tout, Tref) / 2 - (Q / 2 - L - M / 4)*delta_h_molar('Oxygen', Tout, Tref) ) / (-(delta_h_molar('Oxygen', Tin, Tref) + AN2*delta_h_molar('Nitrogen', Tin, Tref) + ACO2*delta_h_molar('Carbon_Dio', Tin, Tref) + AAr*delta_h_molar('Argon', Tin, Tref) + AH2O*delta_h_molar('Water', Tin, Tref)) + ACO2*delta_h_molar('Carbon_Dio', Tout, Tref) + AH2O*delta_h_molar('Water', Tout, Tref) + AAr*delta_h_molar('Argon', Tout, Tref) + AN2*delta_h_molar('Nitrogen', Tout, Tref) + delta_h_molar('Oxygen', Tout, Tref))
+            z = (lhv - L*delta_h_molar('Carbon_Dio', Tout, Tref) - M * delta_h_molar('Water', Tout, Tref) / 2 + T * delta_h_molar('Nitrogen', Tout, Tref) / 2 - (Q / 2 - L - M / 4)*delta_h_molar('Oxygen', Tout, Tref) ) / (-(delta_h_molar('Oxygen', Tin, Tref) + AN2*delta_h_molar('Nitrogen', Tin, Tref) + ACO2*delta_h_molar('Carbon_Dio', Tin, Tref) + AAr*delta_h_molar('Argon', Tin, Tref) + AH2O*delta_h_molar('Water', Tin, Tref)) + ACO2*delta_h_molar('Carbon_Dio', Tout, Tref) + AH2O*delta_h_molar('Water', Tout, Tref) + AAr*delta_h_molar('Argon', Tout, Tref) + AN2*delta_h_molar('Nitrogen', Tout, Tref) + delta_h_molar('Oxygen', Tout, Tref));
             y_total = L + ACO2*z +M/2 + AH2O*z + z*AAr + T/2 + z*AN2 + Q/2 + z - L - M / 4;
             c.y_products = [T/2 + z*AN2, Q/2 + z - L - M/4, z*AAr, L + z*ACO2, M/2 + AH2O*z] .* (1/y_total);
-            
+            c.AF_molar = z*(1+ AN2 + ACO2 + AAr + AH2O);
+            c.Z = z;
         end
     end
     

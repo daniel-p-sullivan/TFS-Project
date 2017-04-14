@@ -16,9 +16,9 @@ GE_fuel_names = ['Methane', 'Ethane', 'Propane', ...,
                  'Butane', 'Pentane', 'Hexane', ... 
                  'Carbon Dioxide', 'Nitrogen', 'Oxygen'];
 GE_fuel_LMQT = [1 4 0 0; 2 6 0 0; 3 8 0 0; 4 10 0 0; 5 12 0 0; ...
-                6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;]
+                6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;];
 GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT;
-GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0]       %kJ/mol
+GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol
 GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV';             %kJ/mol
 
  
@@ -161,9 +161,9 @@ end
 
 %% Unit Conversion
 
-T_range_F = 5:5:110
+T_range_F = 5:5:110;
 Net_Work_Output = Net_Work*1E-3; %MW
-FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600 %lbm/hr
+FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
 HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
 SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
 
