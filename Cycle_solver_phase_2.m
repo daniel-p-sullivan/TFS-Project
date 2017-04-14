@@ -19,7 +19,7 @@ GE_fuel_LMQT = [1 4 0 0; 2 6 0 0; 3 8 0 0; 4 10 0 0; 5 12 0 0; ...
                 6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;];
 GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT;
 GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol
-GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV';             %kJ/mol
+GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;             %kJ/kmol
 
  
 %% Input operating parameters English Units
@@ -123,11 +123,12 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     P(4, i) = HPC.OutletNode.P;
 
     %Solving for station 4
-    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV*1000, GE_equiv_fuel_LMQT);
+    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT);
     Node4 = Combustor1.OutletNode;
     Fluid4 = WorkingFluid(Combustor1.y_products,Node4);
     T(5, i) = Combustor1.To_a;
     P(5, i) = Combustor1.OutletNode.P;
+    MassFlowProducts = ;
 
     %Solving for station 48
     HPT = Turbine(Node4, Fluid4, HPT_eff, HPT_OutletPressure, LPC.Work + HPC.Work, 48);
@@ -160,60 +161,60 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
 end
 
 %% Unit Conversion
-
-T_range_F = 5:5:110;
-Net_Work_Output = Net_Work*1E-3; %MW
-FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
-HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
-SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
-
-%% Plots
-
-figure(1);
-plot(T_range_F, cycle_Eff, '*')                         %plots eff versus T
-title('Cycle Efficiency versus Inlet Air Temperature')
-xlabel('Inlet Air Temperature (\circF)')
-ylabel('Cycle Efficiency')
-legend('Simulation', 'Location', 'east');
-
-figure(2)
-plot(T_range_F, Net_Work_Output, '*', T_range_F, GE_Power, 'r*')                   %plots net work versus T
-title('Net Work versus Inlet Air Temperature')
-xlabel('Inlet Air Temperature (\circF)')
-ylabel('Net Work (MW)')
-legend('Simulation', 'GE Data',  'Location', 'east');
-
-figure(3);
-plot(T_range_F, FuelMassFlowRate_Output, '*', T_range_F, GE_fuelflow_hr, 'r*')           %plots mdotf versus T    
-title('Fuel Mass Flow Rate versus Inlet Air Temperature')
-xlabel('Inlet Air Temperature (\circF)')
-ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')
-legend('Simulation', 'GE Data');
-
-figure(4);
-plot(T_range_F, HeatRate_Output, '*')                   %plots hr versus T
-title('Heat Rate versus Inlet Air Temperature')
-xlabel('Inlet Air Temperature (\circF)')
-ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
-legend('Simulation', 'Location', 'east');
-
-figure(5);
-plot(T_range_F, SpecificFuelConsumption_Output, '*', T_range_F, GE_SFC, 'r*')    %plots sfc versus T
-title('Specific Fuel Consumption versus Inlet Air Temperature')
-xlabel('Inlet Air Temperature (\circF)')
-ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
-legend('Simulation', 'GE Data', 'Location', 'east');
-
-figure(6);
-hold on
-xrange = 0:1:120;   %range for the line plot
-T48_max = 1551;           %LPT Firing temperature?
-plot(T_range_F, T(6, :), '*', T_range_F, GE_T48, 'r*');
-plot([0 120], [1551 1551], 'r--');
-title('HPT Exit Temperature versus Inlet Temperature');
-xlabel('Inlet Air Temperature (\circF)');
-ylabel('HPT Exit Temperature (\circF)');
-legend('Simulation', 'GE Data', '1551 \circF', 'Location', 'east');
+% 
+% T_range_F = 5:5:110;
+% Net_Work_Output = Net_Work*1E-3; %MW
+% FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
+% HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
+% SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
+% 
+% %% Plots
+% 
+% figure(1);
+% plot(T_range_F, cycle_Eff, '*')                         %plots eff versus T
+% title('Cycle Efficiency versus Inlet Air Temperature')
+% xlabel('Inlet Air Temperature (\circF)')
+% ylabel('Cycle Efficiency')
+% legend('Simulation', 'Location', 'east');
+% 
+% figure(2)
+% plot(T_range_F, Net_Work_Output, '*', T_range_F, GE_Power, 'r*')                   %plots net work versus T
+% title('Net Work versus Inlet Air Temperature')
+% xlabel('Inlet Air Temperature (\circF)')
+% ylabel('Net Work (MW)')
+% legend('Simulation', 'GE Data',  'Location', 'east');
+% 
+% figure(3);
+% plot(T_range_F, FuelMassFlowRate_Output, '*', T_range_F, GE_fuelflow_hr, 'r*')           %plots mdotf versus T    
+% title('Fuel Mass Flow Rate versus Inlet Air Temperature')
+% xlabel('Inlet Air Temperature (\circF)')
+% ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')
+% legend('Simulation', 'GE Data');
+% 
+% figure(4);
+% plot(T_range_F, HeatRate_Output, '*')                   %plots hr versus T
+% title('Heat Rate versus Inlet Air Temperature')
+% xlabel('Inlet Air Temperature (\circF)')
+% ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
+% legend('Simulation', 'Location', 'east');
+% 
+% figure(5);
+% plot(T_range_F, SpecificFuelConsumption_Output, '*', T_range_F, GE_SFC, 'r*')    %plots sfc versus T
+% title('Specific Fuel Consumption versus Inlet Air Temperature')
+% xlabel('Inlet Air Temperature (\circF)')
+% ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
+% legend('Simulation', 'GE Data', 'Location', 'east');
+% 
+% figure(6);
+% hold on
+% xrange = 0:1:120;   %range for the line plot
+% T48_max = 1551;           %LPT Firing temperature?
+% plot(T_range_F, T(6, :), '*', T_range_F, GE_T48, 'r*');
+% plot([0 120], [1551 1551], 'r--');
+% title('HPT Exit Temperature versus Inlet Temperature');
+% xlabel('Inlet Air Temperature (\circF)');
+% ylabel('HPT Exit Temperature (\circF)');
+% legend('Simulation', 'GE Data', '1551 \circF', 'Location', 'east');
 %% Write Tables
 
 csvwrite('Station_Pressures.csv', P');
