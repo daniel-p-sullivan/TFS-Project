@@ -12,10 +12,12 @@ classdef Combustor < handle
         y_products
         AF_molar %moles of air/moles of fuel
         Z %moles of O2/moles of fuel
+        Fuel_Molar
+        fuel_massflow
     end
    
     methods
-     function c =  Combustor (Inlet, InletFluid, Tout, outletstation, lhv, lmqt)
+     function c =  Combustor (Inlet, InletFluid, Tout, outletstation, lhv, lmqt, fmm, inlet_massflow)
        
             c.InletNode = Inlet; %setting combustor inlet node
             c.OutletNode.T = Tout; %setting outlet node temperature
@@ -24,6 +26,7 @@ classdef Combustor < handle
             c.To_a = Tout;  %actual outlet temperature
             c.ho_a = mass_hmix(InletFluid.MIX,Tout);  %actual outlet enthalpy
             c.OutletNode.h = c.ho_a;  %setting outlet node enthalpy
+            c.Fuel_Molar = fmm;
             
             L = lmqt(1);
             M = lmqt(2);
@@ -44,6 +47,8 @@ classdef Combustor < handle
             c.y_products = [T/2 + z*AN2, Q/2 + z - L - M/4, z*AAr, L + z*ACO2, M/2 + AH2O*z] .* (1/y_total);
             c.AF_molar = z*(1+ AN2 + ACO2 + AAr + AH2O);
             c.Z = z;
+            
+            c.fuel_massflow = inlet_massflow * fmm / (InletFluid.M * c.AF_molar);
         end
     end
     

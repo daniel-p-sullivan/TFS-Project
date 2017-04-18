@@ -20,6 +20,7 @@ classdef WorkingFluid
         S
         U
         Node
+        M
     end
     
     methods
@@ -39,7 +40,7 @@ classdef WorkingFluid
             c.H = mass_hmix(working_fluid, Node.T);
             c.S = mass_smix(c, 101.325); %Calculating the entropy with reference pressure of 101.325 kPa
             c.U = mass_umix(working_fluid, Node.T);
-            
+            c.M = y * [Gas.Nitrogen.M, Gas.Oxygen.M, Gas.Argon.M, Gas.Carbon_Dioxide.M, Gas.Water.M]';
         end
     end
     
