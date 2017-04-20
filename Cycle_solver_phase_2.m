@@ -43,12 +43,12 @@ HPT_OutletPressure = 0; %Unknown, and used in if statements in the turbine class
 T4_e = 2200;            %Fahrenheit, maximum temp
 VIGV_dP_e = 4;          %in H20, pressure drop across IGV
 Ex_dP_e = 10;           %in H20, pressure drop across exhaust
-LPC_eff = .92;          %LPC efficiency
+LPC_eff = .82;          %LPC efficiency
 r_LPC = 6;              %LPC Compression Ratio
 r_HPC = 4;              %HPC Compress Ratio
-HPC_eff  = .92;         %HPC Isentropic Efficiency
-LPT_eff = .79;        %LPT Isentropic Efficiency calculated with nominal case
-HPT_eff = .93;        %HPT Isentropic Efficiency calculated with nominal case
+HPC_eff  = .82;         %HPC Isentropic Efficiency
+LPT_eff = .97;        %LPT Isentropic Efficiency calculated with nominal case
+HPT_eff = .94;        %HPT Isentropic Efficiency calculated with nominal case
 Generator_eff = .977;   %Given Generator Efficiency
 
 %% Input Operating parameters converted to SI
@@ -170,7 +170,7 @@ end
 T_range_F = 5:5:110;
 Net_Work_Output = Net_Work*1E-3; %MW
 FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
-HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
+HeatRate_Output = 1./cycle_Eff .* 3412.14; %BTU/kW-hr 
 SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
 
 %% Plots
@@ -196,12 +196,12 @@ xlabel('Inlet Air Temperature (\circF)')
 ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')
 legend('Simulation', 'GE Data');
 % 
-% figure(4);
-% plot(T_range_F, HeatRate_Output, '*')                   %plots hr versus T
-% title('Heat Rate versus Inlet Air Temperature')
-% xlabel('Inlet Air Temperature (\circF)')
-% ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
-% legend('Simulation', 'Location', 'east');
+figure(4);
+plot(T_range_F, HeatRate_Output, '*')                   %plots hr versus T
+title('Heat Rate versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
+legend('Simulation', 'Location', 'east');
 % 
 % figure(5);
 % plot(T_range_F, SpecificFuelConsumption_Output, '*', T_range_F, GE_SFC, 'r*')    %plots sfc versus T
@@ -210,16 +210,16 @@ legend('Simulation', 'GE Data');
 % ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
 % legend('Simulation', 'GE Data', 'Location', 'east');
 % 
-% figure(6);
-% hold on
-% xrange = 0:1:120;   %range for the line plot
-% T48_max = 1551;           %LPT Firing temperature?
-% plot(T_range_F, T(6, :), '*', T_range_F, GE_T48, 'r*');
-% plot([0 120], [1551 1551], 'r--');
-% title('HPT Exit Temperature versus Inlet Temperature');
-% xlabel('Inlet Air Temperature (\circF)');
-% ylabel('HPT Exit Temperature (\circF)');
-% legend('Simulation', 'GE Data', '1551 \circF', 'Location', 'east');
+figure(6);
+hold on
+xrange = 0:1:120;   %range for the line plot
+T48_max = 1551;           %LPT Firing temperature?
+plot(T_range_F, T(6, :), '*', T_range_F, GE_T48, 'r*');
+plot([0 120], [1551 1551], 'r--');
+title('HPT Exit Temperature versus Inlet Temperature');
+xlabel('Inlet Air Temperature (\circF)');
+ylabel('HPT Exit Temperature (\circF)');
+legend('Simulation', 'GE Data', '1551 \circF', 'Location', 'east');
 %% Write Tables
 
 csvwrite('Station_Pressures.csv', P');
