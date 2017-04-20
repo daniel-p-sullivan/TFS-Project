@@ -1,12 +1,13 @@
 %% GE Data Input
 
-GE_data = xlsread('FULL LOAD PERFORMANCE LM2500+ G4 (1).xlsx', 1, 'B34:W124');
+GE_data = xlsread('FULL LOAD PERFORMANCE LM2500+ G4 (1).xlsx', 1, 'B34:W170');
 GE_Power = GE_data(1, :) / 1000;                %kW to MW, Net Power
 GE_T48 = GE_data(18, :);                        %GE HPT Exit Temperature
 GE_fuelflow_hr = GE_data(7, :);                 %GE fuel mass flow rate [lb/hr]
 GE_fuelflow_s = GE_fuelflow_hr / 3600;          %GE fuel mass flow rate [lb/s]
 GE_exhaustflow = GE_data(22, :);                %GE exhaust mass flow rate
-GE_massflow = GE_exhaustflow - GE_fuelflow_s;   %GE inlet mass flow rate
+GE_inletflow_cs = GE_data(109,:);               %GE inlet air mass flow rate (lb/s)
+GE_inletflow = GE_inletflow_cs * .453592;       % GE inlet air mass flow rate (kg/s)
 GE_SFC = GE_fuelflow_hr ./ (GE_Power*1E3);      %GE specific fuel consumption
 GE_fuel_molfrac = [84.5 5.58 2.05 0.78 0.18 ...
                    0.17 0.67 5.93 0.14] / 100;
@@ -20,6 +21,8 @@ GE_fuel_LMQT = [1 4 0 0; 2 6 0 0; 3 8 0 0; 4 10 0 0; 5 12 0 0; ...
 GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT;
 GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol
 GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;             %kJ/kmol
+GE_fuel_molar_mass = GE_equiv_fuel_LMQT * [12.01, 1.008, 15.999, 14]'; %kg/kmol
+
 
  
 %% Input operating parameters English Units
@@ -40,12 +43,12 @@ HPT_OutletPressure = 0; %Unknown, and used in if statements in the turbine class
 T4_e = 2200;            %Fahrenheit, maximum temp
 VIGV_dP_e = 4;          %in H20, pressure drop across IGV
 Ex_dP_e = 10;           %in H20, pressure drop across exhaust
-LPC_eff = .82;          %LPC efficiency
+LPC_eff = .92;          %LPC efficiency
 r_LPC = 6;              %LPC Compression Ratio
 r_HPC = 4;              %HPC Compress Ratio
-HPC_eff  = .84;         %HPC Isentropic Efficiency
-LPT_eff = .9476;        %LPT Isentropic Efficiency calculated with nominal case
-HPT_eff = .9727;        %HPT Isentropic Efficiency calculated with nominal case
+HPC_eff  = .92;         %HPC Isentropic Efficiency
+LPT_eff = .79;        %LPT Isentropic Efficiency calculated with nominal case
+HPT_eff = .93;        %HPT Isentropic Efficiency calculated with nominal case
 Generator_eff = .977;   %Given Generator Efficiency
 
 %% Input Operating parameters converted to SI
@@ -71,8 +74,9 @@ HeatRate (22) = zeros;               %BTU/kW-hr
 SpecificFuelConsumption(22) = zeros; %lbm/kW-hr
 T48 = zeros(1, 22);                  %HPT Exit Temperature
 P = zeros(8, 22);                    %Pressure at each station at each inlet temperature
-T = zeros(8, 22);                    %Temperature at each station at each inlet temperature
-
+T = zeros(8, 22);                       %Temperature at each station at each inlet temperature
+MassFlowProducts(22) = zeros;
+MassFlowFuel(22) = zeros;
 %% Variable Mass Flow Rate
 
 Vary_mdot_flag = 1;                               %boolean for turning on variable mass flow rate
@@ -86,7 +90,7 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     %Inlet Ideal Gas Mixture
     InletAir = WetAir(RH1,T1,P1);                   %Create a WetAir object with the input temp, relative Humidity, and pressure.
     if(Vary_mdot_flag == 1)                         %vary mass flow rate?
-        MassFlow_total = GE_massflow(i) * 0.453592; %calculate total mass flow rate given dry air flow rate, kg/s
+        MassFlow_total = GE_inletflow(i); %calculate total mass flow rate given dry air flow rate, kg/s
     else
         MassFlow_total = (1+InletAir.X(2)/InletAir.X(1)) * mflow_DA; %calculate total mass flow rate given dry air flow rate, kg/s    
     end    
@@ -123,12 +127,14 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     P(4, i) = HPC.OutletNode.P;
 
     %Solving for station 4
-    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT);
+    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT, GE_fuel_molar_mass, MassFlow_total);
     Node4 = Combustor1.OutletNode;
     Fluid4 = WorkingFluid(Combustor1.y_products,Node4);
     T(5, i) = Combustor1.To_a;
     P(5, i) = Combustor1.OutletNode.P;
-    MassFlowProducts = ;
+    Node4.h = Fluid4.H; 
+    MassFlowProducts (i) = MassFlow_total + Combustor1.fuel_massflow;
+    MassFlowFuel(i) = Combustor1.fuel_massflow;
 
     %Solving for station 48
     HPT = Turbine(Node4, Fluid4, HPT_eff, HPT_OutletPressure, LPC.Work + HPC.Work, 48);
@@ -152,44 +158,43 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     P(8, i) = Exhaust.OutletP;
 
     %Output Parameters
-    cycle_Eff(i) = LPT.Work/(Node4.h - Node3.h); %calculate cycle efficiency
-    Net_Work(i) = MassFlow_total * LPT.Work*Generator_eff; %calculate net work
-    FuelMassFlowRate(i) = MassFlow_total*(Combustor1.ho_a - HPC.ho_a) / LHV; %lbm/hr
-    HeatRate (i) = FuelMassFlowRate(i)*LHV / Net_Work(i); %BTU/kW-hr
-    SpecificFuelConsumption(i) = FuelMassFlowRate(i) / Net_Work(i); %lbm/kW-hr
+    cycle_Eff(i) = (LPT.Work*MassFlowProducts(i))/((GE_equiv_fuel_LHV)/GE_fuel_molar_mass*MassFlowFuel(i)); %calculate cycle efficiency
+    Net_Work(i) = MassFlowProducts(i) * LPT.Work * Generator_eff; %calculate net work
+    %HeatRate (i) = MassFlowFuel(i)*GE_equiv_fuel_LHV / Net_Work(i); %BTU/kW-hr
+    %SpecificFuelConsumption(i) = FuelMassFlowRate(i) / Net_Work(i); %lbm/kW-hr
 
 end
 
 %% Unit Conversion
-% 
-% T_range_F = 5:5:110;
-% Net_Work_Output = Net_Work*1E-3; %MW
-% FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
-% HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
-% SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
-% 
-% %% Plots
-% 
-% figure(1);
-% plot(T_range_F, cycle_Eff, '*')                         %plots eff versus T
-% title('Cycle Efficiency versus Inlet Air Temperature')
-% xlabel('Inlet Air Temperature (\circF)')
-% ylabel('Cycle Efficiency')
-% legend('Simulation', 'Location', 'east');
-% 
-% figure(2)
-% plot(T_range_F, Net_Work_Output, '*', T_range_F, GE_Power, 'r*')                   %plots net work versus T
-% title('Net Work versus Inlet Air Temperature')
-% xlabel('Inlet Air Temperature (\circF)')
-% ylabel('Net Work (MW)')
-% legend('Simulation', 'GE Data',  'Location', 'east');
-% 
-% figure(3);
-% plot(T_range_F, FuelMassFlowRate_Output, '*', T_range_F, GE_fuelflow_hr, 'r*')           %plots mdotf versus T    
-% title('Fuel Mass Flow Rate versus Inlet Air Temperature')
-% xlabel('Inlet Air Temperature (\circF)')
-% ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')
-% legend('Simulation', 'GE Data');
+
+T_range_F = 5:5:110;
+Net_Work_Output = Net_Work*1E-3; %MW
+FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
+HeatRate_Output = FuelMassFlowRate_Output .*  LHV_e ./ (Net_Work_Output*1E3); %BTU/kW-hr 
+SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
+
+%% Plots
+
+figure(1);
+plot(T_range_F, cycle_Eff, '*')                         %plots eff versus T
+title('Cycle Efficiency versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Cycle Efficiency')
+legend('Simulation', 'Location', 'east');
+
+figure(2)
+plot(T_range_F, Net_Work_Output, '*', T_range_F, GE_Power, 'r*')                   %plots net work versus T
+title('Net Work versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Net Work (MW)')
+legend('Simulation', 'GE Data',  'Location', 'east');
+
+figure(3);
+plot(T_range_F, MassFlowFuel*2.20462*3600, '*', T_range_F, GE_fuelflow_hr, 'r*')           %plots mdotf versus T    
+title('Fuel Mass Flow Rate versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Fuel Mass Flow Rate (lb_m hr^{-1})')
+legend('Simulation', 'GE Data');
 % 
 % figure(4);
 % plot(T_range_F, HeatRate_Output, '*')                   %plots hr versus T

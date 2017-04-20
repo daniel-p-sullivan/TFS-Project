@@ -24,8 +24,6 @@ classdef Combustor < handle
             c.OutletNode.P = Inlet.P;   %setting outlet node pressure
             c.OutletNode.Station = outletstation; %associating combustor outlet with station number
             c.To_a = Tout;  %actual outlet temperature
-            c.ho_a = mass_hmix(InletFluid.MIX,Tout);  %actual outlet enthalpy
-            c.OutletNode.h = c.ho_a;  %setting outlet node enthalpy
             c.Fuel_Molar = fmm;
             
             L = lmqt(1);
@@ -48,7 +46,7 @@ classdef Combustor < handle
             c.AF_molar = z*(1+ AN2 + ACO2 + AAr + AH2O);
             c.Z = z;
             
-            c.fuel_massflow = inlet_massflow * fmm / (InletFluid.M * c.AF_molar);
+            c.fuel_massflow = inlet_massflow * fmm / (InletFluid.M * c.AF_molar); %kg/s
         end
     end
     
