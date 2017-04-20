@@ -19,9 +19,9 @@ GE_fuel_names = ['Methane', 'Ethane', 'Propane', ...,
 GE_fuel_LMQT = [1 4 0 0; 2 6 0 0; 3 8 0 0; 4 10 0 0; 5 12 0 0; ...
                 6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;];
 GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT;
-GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol
-GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;             %kJ/kmol
-GE_fuel_molar_mass = GE_equiv_fuel_LMQT * [12.01 1.008 15.999 14]';
+GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];        %kJ/mol
+GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;                %kJ/kmol
+GE_fuel_molar_mass = GE_equiv_fuel_LMQT * [12.01 1.008 15.999 14]';     %kg / kmol
  
 %% Input operating parameters English Units
 %The following parameters must be set to 0 if they are unknown before
@@ -82,9 +82,12 @@ Least_squares = zeros(7, 7, 7, 7)    %search space
 Vary_mdot_flag = 1;                               %boolean for turning on variable mass flow rate
 
 %% Solve
-lower_bound = 0.8;
-step = 0.06;
-upper_bound = 0.92;
+lower_bound = 0.91;
+step = 0.01;
+upper_bound = 0.93;
+
+lower_lpt = 0.79
+upper_lpt = 0.81
 
 lpc_count = 1;
 hpc_count = 1;
@@ -97,7 +100,7 @@ for lpc_eff = lower_bound:step:upper_bound
 
         for hpt_eff = lower_bound:step:upper_bound
            
-            for lpt_eff = lower_bound:step:upper_bound
+            for lpt_eff = lower_lpt:step:upper_lpt
                 
                 for i=6:22   %iterating through all temperatures in the excel data sheet
                     
@@ -106,7 +109,7 @@ for lpc_eff = lower_bound:step:upper_bound
                     %Inlet Ideal Gas Mixture
                     InletAir = WetAir(RH1,T1,P1);                   %Create a WetAir object with the input temp, relative Humidity, and pressure.
                     if(Vary_mdot_flag == 1)                         %vary mass flow rate?
-                        MassFlow_total = GE_massflow(i) * 0.453592; %calculate total mass flow rate given dry air flow rate, kg/s
+                        MassFlow_total = GE_inletflow(i); %calculate total mass flow rate given dry air flow rate, kg/s
                     else
                         MassFlow_total = (1+InletAir.X(2)/InletAir.X(1)) * mflow_DA; %calculate total mass flow rate given dry air flow rate, kg/s    
                     end    
@@ -143,12 +146,12 @@ for lpc_eff = lower_bound:step:upper_bound
                     P(4, i) = HPC.OutletNode.P;
 
                     %Solving for station 4
-                    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT, GE_fuel_molar_mass, GE_inletflow(i));
+                    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT, GE_fuel_molar_mass, MassFlow_total);
                     Node4 = Combustor1.OutletNode;
                     Fluid4 = WorkingFluid(Combustor1.y_products,Node4);
                     T(5, i) = Combustor1.To_a;
                     P(5, i) = Combustor1.OutletNode.P;
-                    MassFlowProducts(i) = GE_inletflow(i) + Combustor1.fuel_massflow;
+                    MassFlowProducts(i) = MassFlow_total + Combustor1.fuel_massflow;
                     MassFlowFuel(i) = Combustor1.fuel_massflow;
 
                     %Solving for station 48
@@ -173,20 +176,20 @@ for lpc_eff = lower_bound:step:upper_bound
                     P(8, i) = Exhaust.OutletP;
 
                     %Output Parameters
-                    cycle_Eff(i) = MassFlowProducts(i) * LPT.Work/ (GE_inletflow(i) * (Node4.h - Node3.h)); %calculate cycle efficiency
+                    cycle_Eff(i) = MassFlowProducts(i) * LPT.Work/ ((GE_equiv_fuel_LHV / GE_fuel_molar_mass) * MassFlowFuel(i)); %calculate cycle efficiency
                     Net_Work(i) = MassFlowProducts(i) * LPT.Work*Generator_eff; %calculate net work
                     HeatRate (i) = MassFlowFuel(i) * GE_equiv_fuel_LHV / Net_Work(i); %BTU/kW-hr
                     SpecificFuelConsumption(i) = MassFlowFuel(i) / Net_Work(i); %lbm/kW-hr
                     error = ((GE_Power(i) * 1000) - Net_Work(i))^2;
                     Least_squares(lpc_count, hpc_count, hpt_count, lpt_count) =  Least_squares(lpc_count, hpc_count, hpt_count, lpt_count) + error;
                 end
-                lpt_count = lpt_count + 1
+                lpt_count = lpt_count + 1;
             end
             lpt_count = 1;
-            hpt_count = hpt_count + 1
+            hpt_count = hpt_count + 1;
         end
         hpt_count = 1;
-        hpc_count = hpc_count + 1
+        hpc_count = hpc_count + 1;
     end
     hpc_count = 1;
     lpc_count = lpc_count + 1
