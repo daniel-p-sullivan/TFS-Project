@@ -1,3 +1,7 @@
+%This script was written to compare the air fuel ratio calculated with the
+%combustor class agreed with the analytical solution in the homework
+%problem 13.xx
+
 InletNode = Node(1);
 InletNode.T = 197+273.15;
 InletFluid = WorkingFluid([.79,.21,.000001,0.000001,0.00001],InletNode);

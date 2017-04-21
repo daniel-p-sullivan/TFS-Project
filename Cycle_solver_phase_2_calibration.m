@@ -1,4 +1,7 @@
 %% GE Data Input
+%This class is written the same as Cylce_Solver_phase_2, however it
+%contains a loop structure for calibrating the model against the actual output power by varying the 
+%compressor and turbien efficiencies.
 
 GE_data = xlsread('FULL LOAD PERFORMANCE LM2500+ G4 (1).xlsx', 1, 'B34:W170');
 GE_Power = GE_data(1, :) / 1000;                %kW to MW, Net Power
@@ -81,13 +84,14 @@ Least_squares = zeros(7, 7, 7, 7)    %search space
 
 Vary_mdot_flag = 1;                               %boolean for turning on variable mass flow rate
 
-%% Solve
+%% Solve the cycle for different compressor and turbine efficiencies
+%
 lower_bound = 0.91;
 step = 0.01;
 upper_bound = 0.93;
 
-lower_lpt = 0.79
-upper_lpt = 0.81
+lower_lpt = 0.79;
+upper_lpt = 0.81;
 
 lpc_count = 1;
 hpc_count = 1;

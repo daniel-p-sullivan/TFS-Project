@@ -5,22 +5,22 @@ GE_Power = GE_data(1, :) / 1000;                %kW to MW, Net Power
 GE_T48 = GE_data(18, :);                        %GE HPT Exit Temperature
 GE_fuelflow_hr = GE_data(7, :);                 %GE fuel mass flow rate [lb/hr]
 GE_fuelflow_s = GE_fuelflow_hr / 3600;          %GE fuel mass flow rate [lb/s]
-GE_exhaustflow = GE_data(22, :);                %GE exhaust mass flow rate
+GE_exhaustflow = GE_data(22, :);                %GE exhaust mass flow rate [lb/s]
 GE_inletflow_cs = GE_data(109,:);               %GE inlet air mass flow rate (lb/s)
-GE_inletflow = GE_inletflow_cs * .453592;       % GE inlet air mass flow rate (kg/s)
+
 GE_SFC = GE_fuelflow_hr ./ (GE_Power*1E3);      %GE specific fuel consumption
 GE_fuel_molfrac = [84.5 5.58 2.05 0.78 0.18 ...
-                   0.17 0.67 5.93 0.14] / 100;
+                   0.17 0.67 5.93 0.14] / 100;  %mole fraction of fuel constituents. taken from GE spreadsheet
 GE_fuel_massfrac = [71.8447 8.8924 4.7909 2.4027 ...
-                    0.6883 0.7754 1.5628 8.8044 0.2374] / 100;
+                    0.6883 0.7754 1.5628 8.8044 0.2374] / 100; %mass fraction of fuel constituents. taken from GE spreadsheet.
 GE_fuel_names = ['Methane', 'Ethane', 'Propane', ...,
                  'Butane', 'Pentane', 'Hexane', ... 
-                 'Carbon Dioxide', 'Nitrogen', 'Oxygen'];
+                 'Carbon Dioxide', 'Nitrogen', 'Oxygen'];  %fuel name array
 GE_fuel_LMQT = [1 4 0 0; 2 6 0 0; 3 8 0 0; 4 10 0 0; 5 12 0 0; ...
-                6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;];
-GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT;
-GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol
-GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;             %kJ/kmol
+                6 14 0 0; 1 0 2 0; 0 0 0 2; 0 0 2 0;];  %number of carbon atoms (L), Hydrogen atoms (M), oxygen (Q), Nitrogen atoms (T) in each fuel chemical equation
+GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT; %determing the equivalent fuel
+GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol, LHV of each fuel constituent from online source
+GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;             %kJ/kmol, equivalent fuel lower heating value
 GE_fuel_molar_mass = GE_equiv_fuel_LMQT * [12.01, 1.008, 15.999, 14]'; %kg/kmol
 
 
@@ -33,14 +33,13 @@ GE_fuel_molar_mass = GE_equiv_fuel_LMQT * [12.01, 1.008, 15.999, 14]'; %kg/kmol
 T1_e = 65;              %Fahrenheit
 P1_e = 14.417;          %psi
 RH1 = .6;               %Relative Humidity
-mflow_DA_e = 189.7;     %Mass flow rate of dry air, lb/s
-LHV_e = 20185;          %BTU/lb
+LHV_e = 20185;          %BTU/lb, only used in phase 1
 LPT_Work = 0;           %Uknown, must be set to 0 becuase of the if statements in turbine class constructor
 HPT_OutletPressure = 0; %Unknown, and used in if statements in the turbine class constructor
 
 %% Input Design Parameters
 
-T4_e = 2200;            %Fahrenheit, maximum temp
+T4_e = 2200;            %Fahrenheit, assumed adiabatic flame temperature of combustor
 VIGV_dP_e = 4;          %in H20, pressure drop across IGV
 Ex_dP_e = 10;           %in H20, pressure drop across exhaust
 LPC_eff = .82;          %LPC efficiency
@@ -55,8 +54,8 @@ Generator_eff = .977;   %Given Generator Efficiency
 
 T1 = (T1_e+459.67) * (5/9);                  %K
 P1 = 6.89476*P1_e;                           %kPa
-mflow_DA = mflow_DA_e * 0.453592;            %Dry air mass flow rate, kg/s
-LHV = 2.326 * LHV_e;                         %kJ/kg
+GE_inletflow = GE_inletflow_cs * .453592;       % GE inlet air mass flow rate (kg/s)
+LHV = 2.326 * LHV_e;                         %kJ/kg, only used in phase 1
 
 %% Inlet Design Parameters converted to SI
 
@@ -72,14 +71,12 @@ cycle_Eff(22) = zeros;
 FuelMassFlowRate(22) = zeros;        %lbm/hr
 HeatRate (22) = zeros;               %BTU/kW-hr
 SpecificFuelConsumption(22) = zeros; %lbm/kW-hr
-T48 = zeros(1, 22);                  %HPT Exit Temperature
+T48 = zeros(1, 22);                  %HPT Exit Temperature, calculated with our model
 P = zeros(8, 22);                    %Pressure at each station at each inlet temperature
 T = zeros(8, 22);                       %Temperature at each station at each inlet temperature
-MassFlowProducts(22) = zeros;
-MassFlowFuel(22) = zeros;
-%% Variable Mass Flow Rate
+MassFlowProducts(22) = zeros;          %product mass flow rate, kg/s
+MassFlowFuel(22) = zeros;               %kg/s
 
-Vary_mdot_flag = 1;                               %boolean for turning on variable mass flow rate
 
 %% Solve
 
@@ -89,22 +86,19 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
 
     %Inlet Ideal Gas Mixture
     InletAir = WetAir(RH1,T1,P1);                   %Create a WetAir object with the input temp, relative Humidity, and pressure.
-    if(Vary_mdot_flag == 1)                         %vary mass flow rate?
-        MassFlow_total = GE_inletflow(i); %calculate total mass flow rate given dry air flow rate, kg/s
-    else
-        MassFlow_total = (1+InletAir.X(2)/InletAir.X(1)) * mflow_DA; %calculate total mass flow rate given dry air flow rate, kg/s    
-    end    
-
+     
+    MassFlow_total = GE_inletflow(i); %total mass flow rate given wet air flow rate read from GE spreadsheet, kg/s
+   
     %Staion 1
-    Node1 = Node(1);
-    Node1.T = T1;
+    Node1 = Node(1); %Create Node 1
+    Node1.T = T1; %Set node parameters
     Node1.P = P1;
-    T(1, i) = T1;
+    T(1, i) = T1; %store station T and P for output
     P(1, i) = P1;
-    Fluid1 = WorkingFluid(InletAir.Y,Node1);
+    Fluid1 = WorkingFluid(InletAir.Y,Node1); %Create a workingfluid object with the properties of the inlet WetAir object
 
     %Solving for Station 2
-    VIGV1 = GuideVane(Node1,VIGV_dP,2);
+    VIGV1 = GuideVane(Node1,VIGV_dP,2); %create a GuideVane object
     Node2 = VIGV1.OutletNode;
     Fluid2 = WorkingFluid(InletAir.Y, Node2);
     Node2.h = Fluid2.H;

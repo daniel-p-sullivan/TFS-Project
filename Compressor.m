@@ -7,7 +7,7 @@ classdef Compressor < handle
     properties
         InletNode
         OutletNode = Node(0);
-        Efficiency
+        Efficiency  %compressor effieicny
         ho_s %Isentropic outlet enthalpy
         ho_a %actual outlet enthalpy
         To_s %isentropic outlet temp

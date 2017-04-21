@@ -14,10 +14,10 @@ classdef GuideVane < handle
     
     methods
         function c = GuideVane (Inlet, pdrop, outletstation)
-            c.P_drop = pdrop;
-            c.InletP = Inlet.P;
+            c.P_drop = pdrop; %setting pressure drop %kPa
+            c.InletP = Inlet.P; %setting inlet pressure
             c.OutletP = Inlet.P - pdrop; %calculating outlet pressure
-            c.InletNode = Inlet;
+            c.InletNode = Inlet; 
             c.InletT = Inlet.T;
             c.OutletT = Inlet.T;
             c.OutletNode.T = Inlet.T;  %setting outlet node temperature
