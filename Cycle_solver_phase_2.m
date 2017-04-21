@@ -22,7 +22,7 @@ GE_equiv_fuel_LMQT = GE_fuel_molfrac * GE_fuel_LMQT; %determing the equivalent f
 GE_fuel_LHV = [802.34 1437.2 2044.2 2659.3 3272.6 3856.7 0 0 0];       %kJ/mol, LHV of each fuel constituent from online source
 GE_equiv_fuel_LHV = GE_fuel_molfrac * GE_fuel_LHV'*1000;             %kJ/kmol, equivalent fuel lower heating value
 GE_fuel_molar_mass = GE_equiv_fuel_LMQT * [12.01, 1.008, 15.999, 14]'; %kg/kmol
-
+GE_equiv_fuel_LHV_massbased = GE_equiv_fuel_LHV / GE_fuel_molar_mass; %kJ/kg
 
  
 %% Input operating parameters English Units
