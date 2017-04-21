@@ -166,7 +166,7 @@ T_range_F = 5:5:110; %Inlet temp range in Fahrenheit
 Net_Work_Output = Net_Work*1E-3; %MW
 FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
 HeatRate_Output = 1./cycle_Eff .* 3412.14; %BTU/kW-hr 
-SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output*1E3); %lbm/kW-hr
+SpecificFuelConsumption_Output = FuelMassFlowRate_Output ./ (Net_Work_Output * 1E3); %lbm/kW-hr
 
 %% Plots
 
@@ -198,12 +198,12 @@ xlabel('Inlet Air Temperature (\circF)')
 ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
 legend('Simulation', 'Location', 'east');
 
-% figure(5);
-% plot(T_range_F, SpecificFuelConsumption_Output, '*', T_range_F, GE_SFC, 'r*')    %plots sfc versus T
-% title('Specific Fuel Consumption versus Inlet Air Temperature')
-% xlabel('Inlet Air Temperature (\circF)')
-% ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
-% legend('Simulation', 'GE Data', 'Location', 'east');
+figure(5);
+plot(T_range_F, SpecificFuelConsumption_Output, '*', T_range_F, GE_SFC, 'r*')    %plots sfc versus T
+title('Specific Fuel Consumption versus Inlet Air Temperature')
+xlabel('Inlet Air Temperature (\circF)')
+ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
+legend('Simulation', 'GE Data', 'Location', 'east');
 
 figure(6);
 hold on

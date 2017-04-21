@@ -24,7 +24,7 @@ classdef Turbine
             
             if (outletpressure==0) %If outlet pressure is not known, then efficiency and work must be known to solve for outlet conditions.
                 c.ho_a = InletFluid.H - work;
-                c.To_a = T_h_solver(InletFluid, c.ho_a);
+                c.To_a = T_h_solver(InletFluid, c.ho_a); %see T_h_solver for description
                 c.ho_s = InletFluid.H - work/eff;
                 c.To_s = T_h_solver(InletFluid, c.ho_s);
                 c.P_out = exp((mass_s0mix(InletFluid.MIX,c.To_s)-mass_s0mix(InletFluid.MIX,InletFluid.T))/InletFluid.MIX.R)*InletFluid.P; 
@@ -32,7 +32,7 @@ classdef Turbine
             
             if (work==0) %if work is unknown, then outlet pressure and efficiency must be known to solve for outlet conditions
                 c.P_out = outletpressure;
-                c.To_s = T_s_Solver(InletFluid, outletpressure);
+                c.To_s = T_s_Solver(InletFluid, outletpressure); %see T_s_Solver for description
                 c.ho_s = mass_hmix(InletFluid.MIX, c.To_s);
                 c.ho_a = InletFluid.H - eff * (InletFluid.H - c.ho_s);
                 c.To_a = T_h_solver(InletFluid, c.ho_a);

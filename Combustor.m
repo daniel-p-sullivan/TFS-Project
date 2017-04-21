@@ -11,6 +11,7 @@ classdef Combustor < handle
         OutletFluid
         y_products  %mole fraction of products
         AF_molar %moles of air/moles of fuel
+        AF_mass %mass based air fuel ratio
         Z %moles of O2/moles of fuel
         Fuel_Molar %equivalent fuel molar mass (kg/kmol)
         fuel_massflow   %mass flow rate of fuel (kg/s)
@@ -41,12 +42,13 @@ classdef Combustor < handle
             
             
             z = (lhv - L*delta_h_molar('Carbon_Dio', Tout, Tref) - M * delta_h_molar('Water', Tout, Tref) / 2 + T * delta_h_molar('Nitrogen', Tout, Tref) / 2 - (Q / 2 - L - M / 4)*delta_h_molar('Oxygen', Tout, Tref) ) / (-(delta_h_molar('Oxygen', Tin, Tref) + AN2*delta_h_molar('Nitrogen', Tin, Tref) + ACO2*delta_h_molar('Carbon_Dio', Tin, Tref) + AAr*delta_h_molar('Argon', Tin, Tref) + AH2O*delta_h_molar('Water', Tin, Tref)) + ACO2*delta_h_molar('Carbon_Dio', Tout, Tref) + AH2O*delta_h_molar('Water', Tout, Tref) + AAr*delta_h_molar('Argon', Tout, Tref) + AN2*delta_h_molar('Nitrogen', Tout, Tref) + delta_h_molar('Oxygen', Tout, Tref)); %z is the reaction coeffient of oxygen in the reactants
-            y_total = L + ACO2*z +M/2 + AH2O*z + z*AAr + T/2 + z*AN2 + Q/2 + z - L - M / 4;
-            c.y_products = [T/2 + z*AN2, Q/2 + z - L - M/4, z*AAr, L + z*ACO2, M/2 + AH2O*z] .* (1/y_total);
+            y_total = L + ACO2*z +M/2 + AH2O*z + z*AAr + T/2 + z*AN2 + Q/2 + z - L - M / 4; %summing the product reactant coefficients
+            c.y_products = [T/2 + z*AN2, Q/2 + z - L - M/4, z*AAr, L + z*ACO2, M/2 + AH2O*z] .* (1/y_total); %calculating product mole fractions based on reaction coefficients
             c.AF_molar = z*(1+ AN2 + ACO2 + AAr + AH2O);  %calculating air fuel ratio
             c.Z = z;
             
             c.fuel_massflow = inlet_massflow * fmm / (InletFluid.M * c.AF_molar); %kg/s, using air fuel ratio and molar mass of fuel and air
+            c.AF_mass = inlet_massflow / c.fuel_massflow; %mass based air fuel ratio
         end
     end
     
