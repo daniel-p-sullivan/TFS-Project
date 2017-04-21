@@ -56,6 +56,7 @@ T1 = (T1_e+459.67) * (5/9);                  %K
 P1 = 6.89476*P1_e;                           %kPa
 GE_inletflow = GE_inletflow_cs * .453592;       % GE inlet air mass flow rate (kg/s)
 LHV = 2.326 * LHV_e;                         %kJ/kg, only used in phase 1
+GE_equiv_fuel_LHV_English = (GE_equiv_fuel_LHV / GE_fuel_molar_mass) * 0.947817 / 2.2; %LHV (BTU/lb)
 
 %% Inlet Design Parameters converted to SI
 
@@ -80,9 +81,9 @@ MassFlowFuel(22) = zeros;               %kg/s
 
 %% Solve
 
-for i=1:22   %iterating through all temperatures in the excel data sheet
+for i=1:22   %iterating through all temperatures in the GE excel data sheet
 
-    T1 = (5*i+459.67) * (5/9);
+    T1 = (5*i+459.67) * (5/9); % Temperatures converted from F to K
 
     %Inlet Ideal Gas Mixture
     InletAir = WetAir(RH1,T1,P1);                   %Create a WetAir object with the input temp, relative Humidity, and pressure.
@@ -99,29 +100,29 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
 
     %Solving for Station 2
     VIGV1 = GuideVane(Node1,VIGV_dP,2); %create a GuideVane object
-    Node2 = VIGV1.OutletNode;
-    Fluid2 = WorkingFluid(InletAir.Y, Node2);
+    Node2 = VIGV1.OutletNode; 
+    Fluid2 = WorkingFluid(InletAir.Y, Node2); %creates new WorkingFluid with exit conditions
     Node2.h = Fluid2.H;
     T(2, i) = VIGV1.OutletT;
     P(2, i) = VIGV1.OutletP;
 
     %Solving for station 25
-    LPC = Compressor(Node2,Fluid2, LPC_eff, r_LPC, 25);
-    Node25 = LPC.OutletNode;
-    Fluid25 = WorkingFluid(InletAir.Y, Node25);
+    LPC = Compressor(Node2,Fluid2, LPC_eff, r_LPC, 25); %creating low pressure compressor
+    Node25 = LPC.OutletNode; 
+    Fluid25 = WorkingFluid(InletAir.Y, Node25); %creating new fluid at LPC exit conditions
     T(3, i) = LPC.To_a;
     P(3, i) = LPC.OutletNode.P;
 
     %Solving for station 3
-    HPC = Compressor(Node25, Fluid25, HPC_eff, r_HPC, 3);
+    HPC = Compressor(Node25, Fluid25, HPC_eff, r_HPC, 3); %High pressure compressor created
     HPC.OutletNode.T = HPC.To_a;
     Node3 = HPC.OutletNode;
-    Fluid3 = WorkingFluid(InletAir.Y, Node3);
+    Fluid3 = WorkingFluid(InletAir.Y, Node3); 
     T(4, i) = HPC.To_a;
     P(4, i) = HPC.OutletNode.P;
 
     %Solving for station 4
-    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT, GE_fuel_molar_mass, MassFlow_total);
+    Combustor1 = Combustor(Node3,Fluid3, T4, 4, GE_equiv_fuel_LHV, GE_equiv_fuel_LMQT, GE_fuel_molar_mass, MassFlow_total); %creating combustor
     Node4 = Combustor1.OutletNode;
     Fluid4 = WorkingFluid(Combustor1.y_products,Node4);
     T(5, i) = Combustor1.To_a;
@@ -144,7 +145,7 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     T(7, i) = LPT.To_a;
     P(7, i) = LPT.P_out;
 
-    %Solving for 6
+    %Solving for station 6
     Exhaust = GuideVane(Node5, Ex_dP, 6);
     Node6 = Exhaust.OutletNode;
     Fluid6 = WorkingFluid(InletAir.Y, Node6);
@@ -154,14 +155,14 @@ for i=1:22   %iterating through all temperatures in the excel data sheet
     %Output Parameters
     cycle_Eff(i) = (LPT.Work*MassFlowProducts(i))/((GE_equiv_fuel_LHV)/GE_fuel_molar_mass*MassFlowFuel(i)); %calculate cycle efficiency
     Net_Work(i) = MassFlowProducts(i) * LPT.Work * Generator_eff; %calculate net work
-    %HeatRate (i) = MassFlowFuel(i)*GE_equiv_fuel_LHV / Net_Work(i); %BTU/kW-hr
-    %SpecificFuelConsumption(i) = FuelMassFlowRate(i) / Net_Work(i); %lbm/kW-hr
+    HeatRate = 1./ cycle_Eff * 3412.14; %BTU/kW-hr
+    SpecificFuelConsumption(i) = FuelMassFlowRate(i) / Net_Work(i); %lbm/kW-hr
 
 end
 
 %% Unit Conversion
 
-T_range_F = 5:5:110;
+T_range_F = 5:5:110; %Inlet temp range in Fahrenheit 
 Net_Work_Output = Net_Work*1E-3; %MW
 FuelMassFlowRate_Output = FuelMassFlowRate*2.20462*3600; %lbm/hr
 HeatRate_Output = 1./cycle_Eff .* 3412.14; %BTU/kW-hr 
@@ -196,14 +197,14 @@ title('Heat Rate versus Inlet Air Temperature')
 xlabel('Inlet Air Temperature (\circF)')
 ylabel('Heat Rate (BTU kW^{-1} hr^{-1})')
 legend('Simulation', 'Location', 'east');
-% 
+
 % figure(5);
 % plot(T_range_F, SpecificFuelConsumption_Output, '*', T_range_F, GE_SFC, 'r*')    %plots sfc versus T
 % title('Specific Fuel Consumption versus Inlet Air Temperature')
 % xlabel('Inlet Air Temperature (\circF)')
 % ylabel('Specific Fuel Consumption (lb_m kW^{-1} hr^{-1})')
 % legend('Simulation', 'GE Data', 'Location', 'east');
-% 
+
 figure(6);
 hold on
 xrange = 0:1:120;   %range for the line plot

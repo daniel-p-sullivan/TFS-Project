@@ -1,4 +1,4 @@
-classdef Compressor < handle
+classdef Compressor 
     %The inlet and design parameters of the compressor are arguments of the
     %constructor. The outlet parameters are then calculated in the
     %constructor. The compression ratio, efficiency, Inlet pressure, and

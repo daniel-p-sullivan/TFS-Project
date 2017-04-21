@@ -1,4 +1,4 @@
-classdef Turbine < handle
+classdef Turbine 
     %This class solves for the outlet conditions of a turbine given certain
     %inputs. If any of the constructor inputs are not known, they need to
     %be set to 0. The turbine properties are solved for differently
