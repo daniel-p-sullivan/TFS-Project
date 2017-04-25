@@ -42,12 +42,12 @@ HPT_OutletPressure = 0; %Unknown, and used in if statements in the turbine class
 T4_e = 2200;            %Fahrenheit, assumed adiabatic flame temperature of combustor
 VIGV_dP_e = 4;          %in H20, pressure drop across IGV
 Ex_dP_e = 10;           %in H20, pressure drop across exhaust
-LPC_eff = .82;          %LPC efficiency
+LPC_eff = .925;          %LPC efficiency
 r_LPC = 6;              %LPC Compression Ratio
 r_HPC = 4;              %HPC Compress Ratio
-HPC_eff  = .82;         %HPC Isentropic Efficiency
-LPT_eff = .97;        %LPT Isentropic Efficiency calculated with nominal case
-HPT_eff = .94;        %HPT Isentropic Efficiency calculated with nominal case
+HPC_eff  = .925;         %HPC Isentropic Efficiency
+LPT_eff = .785;        %LPT Isentropic Efficiency calculated with nominal case
+HPT_eff = .935;        %HPT Isentropic Efficiency calculated with nominal case
 Generator_eff = .977;   %Given Generator Efficiency
 
 %% Input Operating parameters converted to SI
